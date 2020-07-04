@@ -4,46 +4,33 @@ import android.animation.Animator
 import android.animation.Animator.AnimatorListener
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Debug
+import android.util.Log
+import android.view.View
 import android.view.animation.Animation
 import android.view.animation.Animation.AnimationListener
 import android.view.animation.RotateAnimation
+import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
+import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
-class MainActivity : AppCompatActivity() {
-    private lateinit var cLayoutRoulette: ConstraintLayout
-    private var random: Random = Random()
-    private var lastDir: Float = 0.0f
-    private var spinning: Boolean = false
+class MainActivity : AppCompatActivity(),View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        cLayoutRoulette = findViewById<ConstraintLayout>(R.id.cLayoutRoulette);
+        cLayoutRoulette.setOnClickListener(this)
     }
+    override fun onClick(v: View){
 
-    fun spinRoulette(){
-        if(!spinning){
-            var newDir = random.nextInt(1800).toFloat()
-            var pivotX = cLayoutRoulette.width/2f
-            var pivotY = cLayoutRoulette.height/2f
-
-            var rotate:Animation = RotateAnimation(lastDir, newDir, pivotX, pivotX)
-            rotate.setAnimationListener(object : Animation.AnimationListener {
-                override fun onAnimationStart(p0: Animation?) {
-                    spinning = false
-                }
-                override fun onAnimationEnd(p0: Animation?) {
-                    spinning = false
-                }
-
-                override fun onAnimationRepeat(p0: Animation?) {
-
-                }
-            })
-            lastDir = newDir;
-            cLayoutRoulette.startAnimation(rotate)
+        when(v.id){
+            cLayoutRoulette.id -> {
+                cLayoutRoulette.animate().rotation(10f).start()
+                Log.d("Test", "clicked")}
+            else -> {
+            }
         }
     }
 }
