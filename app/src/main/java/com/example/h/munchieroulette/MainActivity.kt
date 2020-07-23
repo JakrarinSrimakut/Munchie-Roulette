@@ -16,10 +16,19 @@ import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_main.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.util.*
 import java.util.jar.Manifest
 
+private const val TAG = "MainActivity"
+private const val BASE_URL = "https://api.yelp.com/v3/"
+private const val API_KEY = "CDGCfp9-Opqk3eMG0wrg-weBv6aG0_DA96Xq2kkhBKgyR8Yd1P3xnjndQjEWqwpUYO7cyY7xqIIYLEsSdOu5aHufBDaUDk75r9QuO9jyaSEL4VOgCZw2QDH9AIoUX3Yx"
 @Suppress("DEPRECATED_IDENTITY_EQUALS")
 class MainActivity : AppCompatActivity(),View.OnClickListener {
     private var spinning: Boolean = false
@@ -29,6 +38,27 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        //setup retrofit instance
+        val retrofit =
+            Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+
+        //retrofit takes in parameter class instance of using interface yelp service
+        val yelpService = retrofit.create(YelpService::class.java)
+
+        //call method from interface.Async so the process doesn't stop for this but continue on. Don't hold the thread
+
+        yelpService.searchRestaurants( "Bearer $API_KEY","Avocado Toast", "New York").enqueue(object : Callback<YelpSearchResult>{
+            override fun onResponse(call: Call<YelpSearchResult>, response: Response<YelpSearchResult>) {
+                Log.i(TAG, "onResponse $response")
+            }
+            override fun onFailure(call: Call<YelpSearchResult>, t: Throwable) {
+                Log.i(TAG, "onFailure $t")
+            }
+        })
 
         if (ContextCompat.checkSelfPermission(this@MainActivity,
                 android.Manifest.permission.ACCESS_FINE_LOCATION) !==
