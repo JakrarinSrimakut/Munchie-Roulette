@@ -1,23 +1,16 @@
 package com.example.h.munchieroulette
-import android.Manifest.permission.ACCESS_FINE_LOCATION
-import android.animation.Animator
-import android.animation.Animator.AnimatorListener
 import android.content.pm.PackageManager
 import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Debug
 import android.util.Log
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.Animation.AnimationListener
 import android.view.animation.RotateAnimation
-import android.widget.ImageView
 import android.widget.Toast
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_main.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -27,6 +20,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.*
 import android.Manifest
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 
 private const val TAG = "MainActivity"
 private const val BASE_URL = "https://api.yelp.com/v3/"
@@ -41,31 +35,13 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
     private var longitude: Float = 0.0f;
     private var latitude: Float = 0.0f;
     val RequestPermissionCode = 1
+    private val term: String = "food";
+    private var radius: Int = 40000//TODO fun for meters to miles. max:40000 meters
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        //setup retrofit instance
-        val retrofit =
-            Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()
-
-        //retrofit takes in parameter class instance of using interface yelp service
-        val yelpService = retrofit.create(YelpService::class.java)
-
-        //call method from interface.Async so the process doesn't stop for this but continue on. Don't hold the thread
-
-        yelpService.searchRestaurants( "Bearer $API_KEY","Avocado Toast", "New York").enqueue(object : Callback<YelpSearchResult>{
-            override fun onResponse(call: Call<YelpSearchResult>, response: Response<YelpSearchResult>) {
-                Log.i(TAG, "onResponse $response")
-            }
-            override fun onFailure(call: Call<YelpSearchResult>, t: Throwable) {
-                Log.i(TAG, "onFailure $t")
-            }
-        })
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
         /*
         //Get permission to use location
@@ -82,15 +58,37 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
             }
         }
          */
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requestPermission()
-        }
-
+        getLastLocation()
+        queryRestaurants()
         cLayoutRoulette.setOnClickListener(this)
+    }
+
+    fun queryRestaurants(){
+        //setup retrofit instance
+        val retrofit =
+            Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+
+        //retrofit takes in parameter class instance of using interface yelp service
+        val yelpService = retrofit.create(YelpService::class.java)
+
+        //call method from interface.Async so the process doesn't stop for this but continue on. Don't hold the thread
+        //TODO: get lat and long
+        Log.i(TAG, "1." + latitude.toString() + longitude.toString())
+        yelpService.searchRestaurants( "Bearer $API_KEY",term, latitude, longitude, radius).enqueue(object : Callback<YelpSearchResult>{
+            override fun onResponse(call: Call<YelpSearchResult>, response: Response<YelpSearchResult>) {
+                Log.i(TAG, "2." + latitude.toString() + longitude.toString())
+                Log.i(TAG, "onResponse $response")
+
+            }
+            override fun onFailure(call: Call<YelpSearchResult>, t: Throwable) {
+                Log.i(TAG, "onFailure $t")
+            }
+        })
+        Log.i(TAG, "3." + latitude.toString() + longitude.toString())
+
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>,
@@ -114,10 +112,8 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
 
     //when a view is clicked run process according to its view id
     override fun onClick(v: View){
-
         when(v.id){
             cLayoutRoulette.id -> {
-                //getLastLocation
                 spinRoulette()
             }
             else -> {
