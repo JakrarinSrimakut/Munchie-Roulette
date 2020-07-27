@@ -59,7 +59,6 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
         }
          */
         getLastLocation()
-        queryRestaurants()
         cLayoutRoulette.setOnClickListener(this)
     }
 
@@ -75,6 +74,7 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
         val yelpService = retrofit.create(YelpService::class.java)
 
         //call method from interface.Async so the process doesn't stop for this but continue on. Don't hold the thread
+
         //TODO: get lat and long
         Log.i(TAG, "1." + latitude.toString() + longitude.toString())
         yelpService.searchRestaurants( "Bearer $API_KEY",term, latitude, longitude, radius).enqueue(object : Callback<YelpSearchResult>{
@@ -135,6 +135,7 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
                     if (location != null) {
                         latitude = location.latitude.toFloat()
                         longitude = location.longitude.toFloat()
+                        queryRestaurants()
                     }
                 }
         }
