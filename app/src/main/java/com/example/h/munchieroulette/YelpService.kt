@@ -13,6 +13,7 @@ interface YelpService {
         @Query("term") searchTerm: String,
         @Query("latitude") latitude: Float,
         @Query("longitude") longitude: Float,
-        @Query("radius") radius: Int
+        @Query("radius") radius: Int,
+        @Query("limit") limit: Int
     ): Call<YelpSearchResult>//return YelpSearchResult object
 }

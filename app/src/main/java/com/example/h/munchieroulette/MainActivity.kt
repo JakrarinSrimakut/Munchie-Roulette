@@ -37,27 +37,14 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
     val RequestPermissionCode = 1
     private val term: String = "food";
     private var radius: Int = 40000//TODO fun for meters to miles. max:40000 meters
+    private val limit: Int = 16
+    private lateinit var restaurants : List<Any>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
-        /*
-        //Get permission to use location
-        if (ContextCompat.checkSelfPermission(this@MainActivity,
-                android.Manifest.permission.ACCESS_FINE_LOCATION) !==
-            PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this@MainActivity,
-                    android.Manifest.permission.ACCESS_FINE_LOCATION)) {
-                ActivityCompat.requestPermissions(this@MainActivity,
-                    arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 1)
-            } else {
-                ActivityCompat.requestPermissions(this@MainActivity,
-                    arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 1)
-            }
-        }
-         */
         getLastLocation()
         cLayoutRoulette.setOnClickListener(this)
     }
@@ -75,13 +62,13 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
 
         //call method from interface.Async so the process doesn't stop for this but continue on. Don't hold the thread
 
-        //TODO: get lat and long
         Log.i(TAG, "1." + latitude.toString() + longitude.toString())
-        yelpService.searchRestaurants( "Bearer $API_KEY",term, latitude, longitude, radius).enqueue(object : Callback<YelpSearchResult>{
+        yelpService.searchRestaurants( "Bearer $API_KEY",term, latitude, longitude, radius, limit).enqueue(object : Callback<YelpSearchResult>{
             override fun onResponse(call: Call<YelpSearchResult>, response: Response<YelpSearchResult>) {
                 Log.i(TAG, "2." + latitude.toString() + longitude.toString())
                 Log.i(TAG, "onResponse $response")
-
+                restaurants = response.body()?.restaurants as List<Any>
+                //TODO:Set Restaurants title to textview on wheel
             }
             override fun onFailure(call: Call<YelpSearchResult>, t: Throwable) {
                 Log.i(TAG, "onFailure $t")
