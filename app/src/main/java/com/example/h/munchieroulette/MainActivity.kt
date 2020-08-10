@@ -19,8 +19,10 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.*
 import android.Manifest
+import android.widget.TextView
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import org.w3c.dom.Text
 
 private const val TAG = "MainActivity"
 private const val BASE_URL = "https://api.yelp.com/v3/"
@@ -32,14 +34,31 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
     private var lastDir: Float = 0f
     private var random: Random = Random()
     var mLocation: Location? = null
-    private var longitude: Float = 0.0f;
+    private var longitude: Float = 0.0f; //TODO: Change to local variable for lan and Long
     private var latitude: Float = 0.0f;
     val RequestPermissionCode = 1
     private val term: String = "food";
     private var radius: Int = 40000//TODO fun for meters to miles. max:40000 meters
     private val limit: Int = 16
-    private lateinit var restaurants : List<Any>
-
+    private val restaurantID: IntArray = intArrayOf(
+        R.id.restaurantTextView1,
+        R.id.restaurantTextView2,
+        R.id.restaurantTextView3,
+        R.id.restaurantTextView4,
+        R.id.restaurantTextView5,
+        R.id.restaurantTextView6,
+        R.id.restaurantTextView7,
+        R.id.restaurantTextView8,
+        R.id.restaurantTextView9,
+        R.id.restaurantTextView10,
+        R.id.restaurantTextView11,
+        R.id.restaurantTextView12,
+        R.id.restaurantTextView13,
+        R.id.restaurantTextView14,
+        R.id.restaurantTextView15,
+        R.id.restaurantTextView16
+    )
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -49,6 +68,7 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
         cLayoutRoulette.setOnClickListener(this)
     }
 
+    //Pull restaurants near my location
     fun queryRestaurants(){
         //setup retrofit instance
         val retrofit =
@@ -61,14 +81,24 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
         val yelpService = retrofit.create(YelpService::class.java)
 
         //call method from interface.Async so the process doesn't stop for this but continue on. Don't hold the thread
-
-        Log.i(TAG, "1." + latitude.toString() + longitude.toString())
         yelpService.searchRestaurants( "Bearer $API_KEY",term, latitude, longitude, radius, limit).enqueue(object : Callback<YelpSearchResult>{
             override fun onResponse(call: Call<YelpSearchResult>, response: Response<YelpSearchResult>) {
                 Log.i(TAG, "2." + latitude.toString() + longitude.toString())
                 Log.i(TAG, "onResponse $response")
-                restaurants = response.body()?.restaurants as List<Any>
+                var restaurants = response.body()?.restaurants as List<Any>
+                /*
+                restaurants.[i].
+                    categories[o or 1]
+                    distanceInMeters
+                    imageUrl
+                    location.address
+                    name
+                    numReview
+                    price
+                    rating
+                 */
                 //TODO:Set Restaurants title to textview on wheel
+                setRestaurantsTitleToWheel(restaurants, limit)
             }
             override fun onFailure(call: Call<YelpSearchResult>, t: Throwable) {
                 Log.i(TAG, "onFailure $t")
@@ -76,6 +106,16 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
         })
         Log.i(TAG, "3." + latitude.toString() + longitude.toString())
 
+    }
+
+    //Set restaurants titles to wheel
+    fun setRestaurantsTitleToWheel(restaurants: List<Any>,limit: Int){
+        for(x in 0..limit-1){
+            var yelpRestaurant: YelpRestaurant = restaurants[x] as YelpRestaurant
+            var name: String = yelpRestaurant.name
+            var restaurantTextView: TextView = findViewById(restaurantID[x])
+            restaurantTextView.setText(name)
+        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>,
@@ -108,6 +148,7 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
         }
     }
 
+    //Get most recent location Lat and Long
     fun getLastLocation() {
         if (ActivityCompat.checkSelfPermission(
                 this,
