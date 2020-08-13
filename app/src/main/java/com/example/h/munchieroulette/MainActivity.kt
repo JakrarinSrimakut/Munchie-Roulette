@@ -19,6 +19,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.*
 import android.Manifest
+import android.view.animation.LinearInterpolator
 import android.widget.TextView
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -58,7 +59,8 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
         R.id.restaurantTextView15,
         R.id.restaurantTextView16
     )
-    
+    lateinit var restaurants:List<Any>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -83,9 +85,7 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
         //call method from interface.Async so the process doesn't stop for this but continue on. Don't hold the thread
         yelpService.searchRestaurants( "Bearer $API_KEY",term, latitude, longitude, radius, limit).enqueue(object : Callback<YelpSearchResult>{
             override fun onResponse(call: Call<YelpSearchResult>, response: Response<YelpSearchResult>) {
-                Log.i(TAG, "2." + latitude.toString() + longitude.toString())
-                Log.i(TAG, "onResponse $response")
-                var restaurants = response.body()?.restaurants as List<Any>
+                restaurants = response.body()?.restaurants as List<Any>
                 /*
                 restaurants.[i].
                     categories[o or 1]
@@ -181,6 +181,19 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
 
     //Spin the wheel
     fun spinRoulette(){
+
+        cLayoutRoulette.animate()
+            .rotationBy(1000f)
+            .setDuration(3000)
+            .setInterpolator(LinearInterpolator())
+            .start()
+
+        //Random
+
+        var yelpRandomRestaurant: YelpRestaurant = restaurants.random() as YelpRestaurant
+        var name: String = yelpRandomRestaurant.name
+        Toast.makeText(this, name, Toast.LENGTH_LONG).show()
+        /*
         if(!spinning){
             var newDir: Float = random.nextInt(1800).toFloat()
             var pivotX: Float = cLayoutRoulette.getWidth()/2f;
@@ -207,5 +220,6 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
             lastDir = newDir //next spin know where to start off
             cLayoutRoulette.startAnimation(rotate)
         }
+         */
     }
 }
