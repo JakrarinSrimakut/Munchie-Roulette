@@ -1,16 +1,18 @@
 package com.example.h.munchieroulette
+import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Location
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.view.animation.Animation
-import android.view.animation.Animation.AnimationListener
-import android.view.animation.RotateAnimation
+import android.view.animation.LinearInterpolator
+import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import kotlinx.android.synthetic.main.activity_main.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -18,12 +20,6 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.*
-import android.Manifest
-import android.view.animation.LinearInterpolator
-import android.widget.TextView
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
-import org.w3c.dom.Text
 
 private const val TAG = "MainActivity"
 private const val BASE_URL = "https://api.yelp.com/v3/"
@@ -33,7 +29,12 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private var spinning: Boolean = false
     private var lastDir: Float = 0f
+    // We create a Random instance to make our wheel spin randomly
     private var random: Random = Random()
+    private val degree = 0
+    private  var degreeOld:Int = 0
+    // We have 16 sectors on the wheel, we divide 360 by this value to have angle for each sector
+    private val SECTOR = 360f / 16f
     var mLocation: Location? = null
     private var longitude: Float = 0.0f; //TODO: Change to local variable for lan and Long
     private var latitude: Float = 0.0f;
@@ -181,7 +182,7 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
 
     //Spin the wheel
     fun spinRoulette(){
-
+        //TODO:Change roulette spin animation with degrees
         cLayoutRoulette.animate()
             .rotationBy(1000f)
             .setDuration(3000)
@@ -189,7 +190,6 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
             .start()
 
         //Random
-
         var yelpRandomRestaurant: YelpRestaurant = restaurants.random() as YelpRestaurant
         var name: String = yelpRandomRestaurant.name
         Toast.makeText(this, name, Toast.LENGTH_LONG).show()
