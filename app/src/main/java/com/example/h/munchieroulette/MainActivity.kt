@@ -5,7 +5,10 @@ import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.animation.Animation
+import android.view.animation.DecelerateInterpolator
 import android.view.animation.LinearInterpolator
+import android.view.animation.RotateAnimation
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -31,7 +34,7 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
     private var lastDir: Float = 0f
     // We create a Random instance to make our wheel spin randomly
     private var random: Random = Random()
-    private val degree = 0
+    private var degree = 0
     private  var degreeOld:Int = 0
     // We have 16 sectors on the wheel, we divide 360 by this value to have angle for each sector
     private val SECTOR = 360f / 16f
@@ -60,6 +63,7 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
         R.id.restaurantTextView15,
         R.id.restaurantTextView16
     )
+    private val sectorDegrees: Float = (360f / 16f).toFloat()
     lateinit var restaurants:List<Any>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -181,45 +185,57 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
     }
 
     //Spin the wheel
-    fun spinRoulette(){
+    private fun spinRoulette(){
         //TODO:Change roulette spin animation with degrees
-        cLayoutRoulette.animate()
-            .rotationBy(1000f)
-            .setDuration(3000)
-            .setInterpolator(LinearInterpolator())
-            .start()
+        Toast.makeText(this, "clicked", Toast.LENGTH_LONG).show()
 
-        //Random
-        var yelpRandomRestaurant: YelpRestaurant = restaurants.random() as YelpRestaurant
-        var name: String = yelpRandomRestaurant.name
-        Toast.makeText(this, name, Toast.LENGTH_LONG).show()
-        /*
-        if(!spinning){
-            var newDir: Float = random.nextInt(1800).toFloat()
-            var pivotX: Float = cLayoutRoulette.getWidth()/2f;
-            var pivotY: Float = cLayoutRoulette.getHeight()/2f;
+        var resultTV : TextView = findViewById(R.id.resultTextView)
 
-            var rotate: Animation = RotateAnimation(lastDir, newDir, pivotX, pivotY)
-            rotate.setDuration(2500)
-            rotate.setFillAfter(true)
+        degreeOld = degree % 360
+        // we calculate random angle for rotation of our wheel
+        degree = random.nextInt(360) + 720
+        // rotation effect on the center of the wheel
+        var rotateAnim: RotateAnimation = RotateAnimation(
+            degreeOld.toFloat(), degree.toFloat(),
+            RotateAnimation.RELATIVE_TO_PARENT, 0.5f, RotateAnimation.RELATIVE_TO_PARENT, 0.5f)
+        rotateAnim.setDuration(3600)
+        rotateAnim.setFillAfter(true)
+        rotateAnim.setInterpolator(DecelerateInterpolator())
+        rotateAnim.setAnimationListener(object: Animation.AnimationListener {
+            override fun onAnimationStart(animation: Animation?) {
+                resultTV.setText("")
+            }
 
-            rotate.setAnimationListener(object: AnimationListener{
-                override fun onAnimationStart(p0: Animation?) {
-                    spinning = true
-                }
+            override fun onAnimationEnd(animation: Animation?) {
+                resultTV.setText(getSector(360 - (degree % 360)))
+            }
 
-                override fun onAnimationEnd(p0: Animation?) {
-                    spinning = false
-                }
+            override fun onAnimationRepeat(animation: Animation?) {
+                TODO("Not yet implemented")
+            }
 
-                override fun onAnimationRepeat(p0: Animation?) {
-                    TODO("Not yet implemented")
-                }
-            })
 
-            lastDir = newDir //next spin know where to start off
-            cLayoutRoulette.startAnimation(rotate)
-        }
-         */
+        })
+
+    }
+
+    private fun getSector(degrees: Int): String? {
+        var i: Int = 0
+        var text: String? = null
+
+        do {
+            // start and end of each sector on the wheel
+            var start: Float = i * sectorDegrees
+            var end: Float = start + sectorDegrees
+            if(degrees >= start && degrees < end){
+                // degrees is in [start;end[
+                // so text is equals to sectors[i];
+                var sectorYelpRestaurant: YelpRestaurant = restaurants[i] as YelpRestaurant
+                text = sectorYelpRestaurant.name
+            }
+
+            i++
+        }while (text == null && i < restaurants.size)
+        return  text
     }
 }
