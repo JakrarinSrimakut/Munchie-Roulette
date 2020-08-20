@@ -190,14 +190,16 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
         Toast.makeText(this, "clicked", Toast.LENGTH_LONG).show()
 
         var resultTV : TextView = findViewById(R.id.resultTextView)
-
         degreeOld = degree % 360
+
         // we calculate random angle for rotation of our wheel
         degree = random.nextInt(360) + 720
+
+
         // rotation effect on the center of the wheel
         var rotateAnim: RotateAnimation = RotateAnimation(
             degreeOld.toFloat(), degree.toFloat(),
-            RotateAnimation.RELATIVE_TO_PARENT, 0.5f, RotateAnimation.RELATIVE_TO_PARENT, 0.5f)
+            RotateAnimation.RELATIVE_TO_SELF, 0.5f, RotateAnimation.RELATIVE_TO_SELF, 0.5f)
         rotateAnim.setDuration(3600)
         rotateAnim.setFillAfter(true)
         rotateAnim.setInterpolator(DecelerateInterpolator())
@@ -213,10 +215,38 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
             override fun onAnimationRepeat(animation: Animation?) {
                 TODO("Not yet implemented")
             }
-
-
         })
 
+        //Start animation
+        cLayoutRoulette.startAnimation(rotateAnim)
+/*
+        if(!spinning){
+            var newDir: Float = random.nextInt(1800).toFloat()
+            var pivotX: Float = cLayoutRoulette.getWidth()/2f;
+            var pivotY: Float = cLayoutRoulette.getHeight()/2f;
+
+            var rotate: Animation = RotateAnimation(lastDir, newDir, pivotX, pivotY)
+            rotate.setDuration(2500)
+            rotate.setFillAfter(true)
+
+            rotate.setAnimationListener(object: AnimationListener{
+                override fun onAnimationStart(p0: Animation?) {
+                    spinning = true
+                }
+
+                override fun onAnimationEnd(p0: Animation?) {
+                    spinning = false
+                }
+
+                override fun onAnimationRepeat(p0: Animation?) {
+                    TODO("Not yet implemented")
+                }
+            })
+
+            lastDir = newDir //next spin know where to start off
+            cLayoutRoulette.startAnimation(rotate)
+        }
+         */
     }
 
     private fun getSector(degrees: Int): String? {
