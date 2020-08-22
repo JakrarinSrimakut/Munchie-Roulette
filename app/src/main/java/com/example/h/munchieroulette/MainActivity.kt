@@ -34,8 +34,8 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
     private var lastDir: Float = 0f
     // We create a Random instance to make our wheel spin randomly
     private var random: Random = Random()
-    private var degree = 0
-    private  var degreeOld:Int = 0
+    private var degree: Float = 0f
+    private  var degreeOld: Float = 0f
     // We have 16 sectors on the wheel, we divide 360 by this value to have angle for each sector
     private val SECTOR = 360f / 16f
     var mLocation: Location? = null
@@ -186,14 +186,11 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
 
     //Spin the wheel
     private fun spinRoulette(){
-        //TODO:Change roulette spin animation with degrees
-        Toast.makeText(this, "clicked", Toast.LENGTH_LONG).show()
-
         var resultTV : TextView = findViewById(R.id.resultTextView)
         degreeOld = degree % 360
 
         // we calculate random angle for rotation of our wheel
-        degree = random.nextInt(360) + 720
+        degree = (random.nextInt(360) + 720).toFloat()
 
 
         // rotation effect on the center of the wheel
@@ -209,7 +206,7 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
             }
 
             override fun onAnimationEnd(animation: Animation?) {
-                resultTV.setText(getSector(360 - (degree % 360)))
+                resultTV.setText(getSector(360f - (degree % 360)))// the subtraction is b/c the wheel is turning clockwise so the sector landing would be from left
             }
 
             override fun onAnimationRepeat(animation: Animation?) {
@@ -249,15 +246,24 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
          */
     }
 
-    private fun getSector(degrees: Int): String? {
+    //Return the sector's restaurant name
+    private fun getSector(degrees: Float): String? {
+        var degreesWithOffset: Float = degrees - sectorDegrees
         var i: Int = 0
         var text: String? = null
-
+        //degrees = 0 to 11.25 will have negative degreesWithOffset. Convert to 348.75 359.99 accordingly
+        if(degreesWithOffset < 0){
+            degreesWithOffset = 360 + degreesWithOffset
+        }
+        var start: Float
+        var end: Float
         do {
             // start and end of each sector on the wheel
-            var start: Float = i * sectorDegrees
-            var end: Float = start + sectorDegrees
-            if(degrees >= start && degrees < end){
+            start = i * sectorDegrees
+            end = start + sectorDegrees
+            Log.d(TAG, "i:$i start:$start end:$end")
+
+            if(degreesWithOffset >= start && degreesWithOffset < end){
                 // degrees is in [start;end[
                 // so text is equals to sectors[i];
                 var sectorYelpRestaurant: YelpRestaurant = restaurants[i] as YelpRestaurant
@@ -266,6 +272,8 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
 
             i++
         }while (text == null && i < restaurants.size)
+        Log.d(TAG, "Degree:$degreesWithOffset i:$i start:$start end:$end")
+        //Toast.makeText(this, "Degree:" + degreesWithOffset + "i:" + i, Toast.LENGTH_LONG).show()
         return  text
     }
 }
