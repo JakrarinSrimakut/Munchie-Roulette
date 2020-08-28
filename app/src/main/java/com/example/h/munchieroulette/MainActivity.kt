@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
     // We have 16 sectors on the wheel, we divide 360 by this value to have angle for each sector
     private val SECTOR = 360f / 16f
     var mLocation: Location? = null
-    private var longitude: Float = 0.0f; //TODO: Change to local variable for lan and Long
+    private var longitude: Float = 0.0f;
     private var latitude: Float = 0.0f;
     val RequestPermissionCode = 1
     private val term: String = "food";
@@ -102,7 +102,6 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
                     price
                     rating
                  */
-                //TODO:Set Restaurants title to textview on wheel
                 setRestaurantsTitleToWheel(restaurants, limit)
             }
             override fun onFailure(call: Call<YelpSearchResult>, t: Throwable) {
@@ -123,6 +122,7 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
         }
     }
 
+    //Handle for requesting location permissiion
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>,
                                             grantResults: IntArray) {
         when (requestCode) {
@@ -207,6 +207,7 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
 
             override fun onAnimationEnd(animation: Animation?) {
                 resultTV.setText(getSector(360f - (degree % 360)))// the subtraction is b/c the wheel is turning clockwise so the sector landing would be from left
+                TODO("Open popup window with restaurant info")
             }
 
             override fun onAnimationRepeat(animation: Animation?) {
