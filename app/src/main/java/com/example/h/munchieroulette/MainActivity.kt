@@ -1,21 +1,26 @@
 package com.example.h.munchieroulette
 import android.Manifest
+import android.app.ActionBar
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.View.inflate
 import android.view.animation.Animation
 import android.view.animation.DecelerateInterpolator
-import android.view.animation.LinearInterpolator
 import android.view.animation.RotateAnimation
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ColorStateListInflaterCompat.inflate
+import androidx.core.content.res.ComplexColorCompat.inflate
+import androidx.core.graphics.drawable.DrawableCompat.inflate
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_main.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -206,8 +211,7 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
             }
 
             override fun onAnimationEnd(animation: Animation?) {
-                resultTV.setText(getSector(360f - (degree % 360)))// the subtraction is b/c the wheel is turning clockwise so the sector landing would be from left
-                TODO("Open popup window with restaurant info")
+                getSectorRestaurantPopup(360f - (degree % 360))// the subtraction is b/c the wheel is turning clockwise so the sector landing would be from left
             }
 
             override fun onAnimationRepeat(animation: Animation?) {
@@ -247,11 +251,13 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
          */
     }
 
-    //Return the sector's restaurant name
-    private fun getSector(degrees: Float): String? {
+    //Get Sector's popup window
+    private fun getSectorRestaurantPopup(degrees: Float) {
         var degreesWithOffset: Float = degrees - sectorDegrees
         var i: Int = 0
         var text: String? = null
+        lateinit var sectorYelpRestaurant: YelpRestaurant
+
         //degrees = 0 to 11.25 will have negative degreesWithOffset. Convert to 348.75 359.99 accordingly
         if(degreesWithOffset < 0){
             degreesWithOffset = 360 + degreesWithOffset
@@ -267,7 +273,7 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
             if(degreesWithOffset >= start && degreesWithOffset < end){
                 // degrees is in [start;end[
                 // so text is equals to sectors[i];
-                var sectorYelpRestaurant: YelpRestaurant = restaurants[i] as YelpRestaurant
+                sectorYelpRestaurant = restaurants[i] as YelpRestaurant
                 text = sectorYelpRestaurant.name
             }
 
@@ -275,6 +281,25 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
         }while (text == null && i < restaurants.size)
         Log.d(TAG, "Degree:$degreesWithOffset i:$i start:$start end:$end")
         //Toast.makeText(this, "Degree:" + degreesWithOffset + "i:" + i, Toast.LENGTH_LONG).show()
-        return  text
+        //todo handler for sector yelp restuarant
+        showRestaurantPopup(sectorYelpRestaurant)
+    }
+
+    //Display restaurant popup window
+    private fun showRestaurantPopup(sectorYelpRestaurant: YelpRestaurant) {
+        val mainLayout = layoutInflater.inflate(R.layout.activity_main, null)
+        val popupWindow = PopupWindow(mainLayout, ActionBar.LayoutParams.MATCH_PARENT,ActionBar.LayoutParams.MATCH_PARENT,true )
+        val popupView = layoutInflater.inflate(R.layout.layout_popup, null)
+
+        popupWindow.contentView = popupView
+        val closeWindowImageButton = popupView.findViewById<ImageButton>(R.id.closeWindowImageButton)
+        closeWindowImageButton.setOnClickListener{
+            popupWindow.dismiss()
+        }
+        popupWindow.showAtLocation(cLayoutParent, 0, 0, 0)
+        //TODO("fill data into popup window")
+        //fill restaurant image
+        val popupWindowImageView : ImageView = popupView.findViewById(R.id.popupWindowImageView)
+        Picasso.get().load(sectorYelpRestaurant.imageUrl).into(popupWindowImageView)
     }
 }
