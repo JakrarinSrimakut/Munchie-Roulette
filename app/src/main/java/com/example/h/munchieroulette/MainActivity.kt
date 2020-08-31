@@ -5,9 +5,7 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.View.inflate
 import android.view.animation.Animation
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.RotateAnimation
@@ -15,9 +13,6 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.res.ColorStateListInflaterCompat.inflate
-import androidx.core.content.res.ComplexColorCompat.inflate
-import androidx.core.graphics.drawable.DrawableCompat.inflate
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.squareup.picasso.Picasso
@@ -290,6 +285,10 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
         val mainLayout = layoutInflater.inflate(R.layout.activity_main, null)
         val popupWindow = PopupWindow(mainLayout, ActionBar.LayoutParams.MATCH_PARENT,ActionBar.LayoutParams.MATCH_PARENT,true )
         val popupView = layoutInflater.inflate(R.layout.layout_popup, null)
+        val popupWindowImage : ImageView = popupView.findViewById(R.id.popupWindowImageView)
+        val popupRestaurantName : TextView = popupView.findViewById(R.id.restaurantNameTextView)
+        val popupAddress : TextView = popupView.findViewById(R.id.addressTextView)
+        val popupRating : TextView = popupView.findViewById(R.id.ratingNumberTextView)
 
         popupWindow.contentView = popupView
         val closeWindowImageButton = popupView.findViewById<ImageButton>(R.id.closeWindowImageButton)
@@ -297,9 +296,12 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
             popupWindow.dismiss()
         }
         popupWindow.showAtLocation(cLayoutParent, 0, 0, 0)
-        //TODO("fill data into popup window")
-        //fill restaurant image
-        val popupWindowImageView : ImageView = popupView.findViewById(R.id.popupWindowImageView)
-        Picasso.get().load(sectorYelpRestaurant.imageUrl).into(popupWindowImageView)
+        //TODO("pretify popup window")
+        //fill restaurant image using picasso to directly pull image from imageUrl
+        Picasso.get().load(sectorYelpRestaurant.imageUrl).into(popupWindowImage)
+        popupRestaurantName.setText(sectorYelpRestaurant.name)
+        popupAddress.setText(sectorYelpRestaurant.location.address)
+        popupRating.setText(sectorYelpRestaurant.rating.toString())
+
     }
 }
