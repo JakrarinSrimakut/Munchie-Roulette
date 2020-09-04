@@ -1,8 +1,10 @@
 package com.example.h.munchieroulette
 import android.Manifest
 import android.app.ActionBar
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -289,13 +291,24 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
         val popupRestaurantName : TextView = popupView.findViewById(R.id.restaurantNameTextView)
         val popupAddress : TextView = popupView.findViewById(R.id.addressTextView)
         val popupRating : TextView = popupView.findViewById(R.id.ratingNumberTextView)
+        val popupDirection: Button = popupView.findViewById(R.id.directionButton)
+        val popupMenu: Button = popupView.findViewById(R.id.menuButton)
+        val closeWindowImageButton = popupView.findViewById<ImageButton>(R.id.closeWindowImageButton)
+        val intent: Intent = Intent(android.content.Intent.ACTION_VIEW,
+            Uri.parse("https://www.google.com/maps/dir/?api=1&origin=$latitude,$longitude&destination=" + sectorYelpRestaurant.location.address))
 
         popupWindow.contentView = popupView
-        val closeWindowImageButton = popupView.findViewById<ImageButton>(R.id.closeWindowImageButton)
+        //Close Popup Window
         closeWindowImageButton.setOnClickListener{
             popupWindow.dismiss()
         }
         popupWindow.showAtLocation(cLayoutParent, 0, 0, 0)
+
+        //Open google map direction
+        popupDirection.setOnClickListener{
+            startActivity(intent)
+        }
+
         //TODO("pretify popup window")
         //fill restaurant image using picasso to directly pull image from imageUrl
         Picasso.get().load(sectorYelpRestaurant.imageUrl).into(popupWindowImage)
