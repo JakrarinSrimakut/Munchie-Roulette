@@ -309,6 +309,9 @@ class MainActivity : AppCompatActivity(),View.OnClickListener {
             startActivity(intent)
         }
 
+        popupMenu.setOnClickListener{
+
+        }
         //TODO("pretify popup window")
         //fill restaurant image using picasso to directly pull image from imageUrl
         Picasso.get().load(sectorYelpRestaurant.imageUrl).into(popupWindowImage)
